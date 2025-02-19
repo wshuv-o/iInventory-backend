@@ -40,8 +40,8 @@ export class UserController {
     return user;
   }
   @Post('signup')
-  async signup(@Body() body: { email: string; password: string; name: string }): Promise<User> {
-    const { email, password, name } = body;
+  async signup(@Body() body: { email: string; phone:string; password: string; name: string }): Promise<User> {
+    const { email,phone, password, name } = body;
 
     // Check if user with the same email already exists
     const existingUser = await this.userService.findByEmail(email);
@@ -50,7 +50,7 @@ export class UserController {
     }
 
     // Create new user
-    const newUser = await this.userService.create({ email, password, name });
+    const newUser = await this.userService.create({ email, phone, password, name });
 
     return newUser;
   }
