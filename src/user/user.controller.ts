@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Req, UnauthorizedException, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, Get, Req, UnauthorizedException, HttpException, HttpStatus, Param, Put } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './user.entity';
 
@@ -8,7 +8,7 @@ export class UserController {
 
   // Endpoint for logging in
   @Post('login')
-  async login(@Body() body: { email: string; password: string }): Promise<{ message: string }> {
+  async login(@Body() body: { email: string; password: string }): Promise<User> {
     const { email, password } = body;
     const user = await this.userService.findByEmail(email);
 
@@ -20,7 +20,7 @@ export class UserController {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    return { message: 'Login successful' };
+    return user;
   }
 
   // Get the logged-in user's profile
@@ -54,4 +54,30 @@ export class UserController {
 
     return newUser;
   }
+
+    // Get user by ID
+    @Get(':id')
+    async getUserById(@Param('id') id: number): Promise<User> {
+      const user = await this.userService.findById(id);
+  
+      if (!user) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+  
+      return user;
+    }
+  
+    // Update user details
+    @Put(':id')
+    async updateUser(@Param('id') id: number, @Body() updateData: Partial<User>): Promise<{message: string}> {
+      const user = await this.userService.findById(id);
+  
+      if (!user) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+  
+      const updatedUser = await this.userService.updateUser(id, updateData);
+      return {message: "User updated successfully"};
+    }
+    
 }
