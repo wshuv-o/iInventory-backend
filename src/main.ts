@@ -8,7 +8,7 @@ async function createApp() {
   const app = express();
   const nestApp = await NestFactory.create(AppModule, new ExpressAdapter(app));
   nestApp.enableCors({
-    origin: 'http://localhost:3000',
+    origin: 'https://storemore-iu2yg8pns-wshuv-os-projects.vercel.app',
     credentials: true,
   });
   await nestApp.init();
