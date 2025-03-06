@@ -6,6 +6,11 @@ import { User } from './user.entity';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Get()
+  async getAllUsers(): Promise<User[]> {
+    return this.userService.findAll();
+  }
+  
   // Endpoint for logging in
   @Post('login')
   async login(@Body() body: { email: string; password: string }): Promise<User> {
@@ -39,18 +44,37 @@ export class UserController {
 
     return user;
   }
-  @Post('signup')
-  async signup(@Body() body: { email: string; phone:string; password: string; name: string }): Promise<User> {
-    const { email,phone, password, name } = body;
+  // @Post('signup')
+  // async signup(@Body() body: { email: string; phone:string; password: string; name: string }): Promise<User> {
+  //   const { email,phone, password, name } = body;
 
-    // Check if user with the same email already exists
+  //   const existingUser = await this.userService.findByEmail(email);
+  //   if (existingUser) {
+  //     throw new HttpException('User with this email already exists', HttpStatus.BAD_REQUEST);
+  //   }
+
+
+  //   const newUser = await this.userService.create({ email, phone, password, name });
+  //   return newUser;
+  // }
+
+  @Post('signup')
+  async signup(@Body() body: { email: string; phone: string; password: string; name: string; role?: string }): Promise<User> {
+    const { email, phone, password, name, role } = body;
     const existingUser = await this.userService.findByEmail(email);
+    
     if (existingUser) {
       throw new HttpException('User with this email already exists', HttpStatus.BAD_REQUEST);
     }
 
-    // Create new user
-    const newUser = await this.userService.create({ email, phone, password, name });
+    const newUser = await this.userService.create({
+      email,
+      phone,
+      password,
+      name,
+      role: role as string ?? null,  
+      state: 'pending', 
+    });
 
     return newUser;
   }
@@ -78,6 +102,17 @@ export class UserController {
   
       const updatedUser = await this.userService.updateUser(id, updateData);
       return {message: "User updated successfully"};
+    }
+
+    @Put(':id/state')
+    async updateUserState(@Param('id') id: number, @Body() body: { state: 'pending'|'deleted' | 'approved' }): Promise<{ message: string }> {
+      const user = await this.userService.findById(id);
+      if (!user) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+      
+      await this.userService.updateUser(id, { state: body.state });
+      return { message: `User state updated to ${body.state}` };
     }
     
 }

@@ -17,6 +17,9 @@ export class Product {
   @Column()
   image: string;
 
+  @Column({nullable:true})
+  vendor: string;
+
   @Column({ nullable: true, type: 'int' }) 
   quantity: number | null;  
 }
